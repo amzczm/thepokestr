@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pokestr — founder round</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0A0D14;
+    --ink-soft: #141822;
+    --card: #F2E8D5;
+    --card-dark: #1B1F2A;
+    --gold: #E5B547;
+    --gold-deep: #B88A1E;
+    --burn: #D63B2C;
+    --bolt: #F5D547;
+    --leaf: #6BA368;
+    --water: #4A88C7;
+    --psy: #A668C7;
+    --mute: #6B7280;
+    --hairline: rgba(242, 232, 213, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ink);
+    color: var(--card);
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .holo {
+    background:
+      linear-gradient(125deg, rgba(255,0,180,0.18) 0%, rgba(0,200,255,0.18) 25%, rgba(255,220,80,0.22) 50%, rgba(0,255,180,0.18) 75%, rgba(180,80,255,0.18) 100%),
+      repeating-linear-gradient(45deg, transparent 0px, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px),
+      var(--card-dark);
+    background-size: 400% 400%, 8px 8px, 100% 100%;
+    animation: holoshift 18s ease infinite;
+  }
+  .holo-intense {
+    background:
+      linear-gradient(125deg, rgba(255,0,180,0.32) 0%, rgba(0,200,255,0.32) 25%, rgba(255,220,80,0.38) 50%, rgba(0,255,180,0.32) 75%, rgba(180,80,255,0.32) 100%),
+      repeating-linear-gradient(45deg, transparent 0px, transparent 2px, rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 4px),
+      var(--card-dark);
+    background-size: 400% 400%, 8px 8px, 100% 100%;
+    animation: holoshift 14s ease infinite;
+  }
+  @keyframes holoshift {
+    0%, 100% { background-position: 0% 50%, 0 0, 0 0; }
+    50% { background-position: 100% 50%, 0 0, 0 0; }
+  }
+
+  .shell { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+
+  .ribbon {
+    padding: 14px 32px;
+    border-bottom: 1px solid var(--hairline);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mute);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(8px);
+    background: rgba(10, 13, 20, 0.85);
+  }
+  .ribbon-mark { color: var(--gold); font-weight: 700; }
+  .ribbon-home {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--card);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 6px 20px;
+    border: 1px solid var(--hairline);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .ribbon-home:hover { color: var(--gold); border-color: rgba(229,181,71,0.4); }
+  .ribbon-status {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--leaf);
+  }
+  .pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--leaf);
+    box-shadow: 0 0 0 0 var(--leaf);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(107, 163, 104, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(107, 163, 104, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(107, 163, 104, 0); }
+  }
+
+  /* === Hero === */
+  .cover { padding: 100px 32px 80px; position: relative; overflow: hidden; }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(229, 181, 71, 0.1), transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(214, 59, 44, 0.06), transparent 50%);
+    pointer-events: none;
+  }
+  .cover-inner { position: relative; }
+  .cover-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .cover-meta::before { content: ''; width: 28px; height: 1px; background: var(--gold); }
+  .cover h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(56px, 9vw, 128px);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    margin-bottom: 32px;
+    max-width: 1000px;
+  }
+  .cover h1 .accent {
+    background: linear-gradient(120deg, var(--gold), var(--bolt), var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .cover .lede {
+    font-size: 20px;
+    line-height: 1.45;
+    color: rgba(242, 232, 213, 0.78);
+    max-width: 620px;
+    margin-bottom: 48px;
+  }
+
+  /* === Raise progress bar === */
+  .raise {
+    border: 1px solid var(--hairline);
+    padding: 32px;
+    max-width: 720px;
+    background: var(--ink-soft);
+  }
+  .raise-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 18px;
+  }
+  .raise-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em;
+    color: var(--mute); text-transform: uppercase;
+  }
+  .raise-amount {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 36px; font-weight: 700;
+    color: var(--gold); letter-spacing: -0.02em;
+  }
+  .progress {
+    height: 8px; background: rgba(242,232,213,0.08);
+    border: 1px solid var(--hairline);
+    position: relative; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--bolt));
+    transition: width 1s ease;
+  }
+  .raise-meta {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--hairline);
+    margin-top: 24px; border: 1px solid var(--hairline);
+  }
+  .raise-meta > div {
+    background: var(--ink-soft);
+    padding: 16px;
+    text-align: left;
+  }
+  .raise-meta .k {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.12em;
+    color: var(--mute); text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .raise-meta .v {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px; font-weight: 700;
+  }
+  .raise-meta .v.gold { color: var(--gold); }
+
+  /* === Sections === */
+  section { padding: 80px 32px; border-top: 1px solid var(--hairline); }
+  .section-head {
+    display: grid; grid-template-columns: 1fr 3fr;
+    gap: 48px; margin-bottom: 56px; align-items: end;
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.16em;
+    color: var(--gold); text-transform: uppercase;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-num::after { content: ''; flex: 1; height: 1px; background: var(--hairline); }
+  .section-head h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 600; line-height: 1;
+    letter-spacing: -0.03em;
+    text-transform: lowercase;
+  }
+  .section-lede {
+    grid-column: 2;
+    font-size: 17px;
+    color: rgba(242, 232, 213, 0.74);
+    max-width: 720px;
+    margin-top: 18px;
+  }
+
+  /* === The deal stats === */
+  .deal {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--hairline);
+    border: 1px solid var(--hairline);
+  }
+  .deal-cell { background: var(--ink); padding: 32px 24px; }
+  .deal-cell .k {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em;
+    color: var(--mute); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .deal-cell .v {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px; font-weight: 700;
+    letter-spacing: -0.02em; color: var(--card);
+  }
+  .deal-cell .v.gold { color: var(--gold); }
+  .deal-cell .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--mute);
+    margin-top: 8px; line-height: 1.5;
+  }
+
+  /* === Tier grid - asymmetric to emphasize $5k and $10k === */
+  .tiers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .tier-small-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    grid-column: 1 / -1;
+  }
+
+  .tier {
+    border: 1px solid var(--hairline);
+    padding: 32px 28px;
+    background: var(--ink-soft);
+    position: relative;
+    transition: transform 0.3s, border-color 0.3s;
+    display: flex; flex-direction: column;
+  }
+  .tier:hover { transform: translateY(-4px); }
+
+  .tier-rarity {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .tier-rarity::before { content: '◇'; }
+  .tier-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: -0.02em;
+    text-transform: lowercase;
+    margin-bottom: 8px;
+  }
+  .tier-price {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(40px, 5vw, 56px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .tier-slot {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .tier-divider {
+    height: 1px;
+    background: var(--hairline);
+    margin: 20px 0;
+  }
+
+  .tier-allocation {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .tier-allocation .cell {
+    border: 1px solid var(--hairline);
+    padding: 12px 14px;
+  }
+  .tier-allocation .cell .k {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.1em;
+    color: var(--mute); text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .tier-allocation .cell .v {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px; font-weight: 700;
+    color: var(--card);
+  }
+  .tier-allocation .cell .v.gold { color: var(--gold); }
+
+  .tier-perks {
+    list-style: none;
+    margin-bottom: auto;
+  }
+  .tier-perks li {
+    font-size: 14px;
+    color: rgba(242,232,213,0.8);
+    padding: 8px 0;
+    padding-left: 22px;
+    position: relative;
+    line-height: 1.45;
+  }
+  .tier-perks li::before {
+    content: '◆';
+    position: absolute;
+    left: 0;
+    color: var(--mute);
+    font-size: 10px;
+    top: 11px;
+  }
+  .tier-perks li.gold::before { color: var(--gold); }
+  .tier-perks li.gold { color: var(--card); }
+
+  /* Featured tiers (5k, 10k) */
+  .tier-featured {
+    border-color: rgba(229, 181, 71, 0.5);
+    background:
+      linear-gradient(180deg, rgba(229,181,71,0.06), transparent 40%),
+      var(--ink-soft);
+  }
+  .tier-featured .tier-rarity { color: var(--gold); }
+  .tier-featured .tier-perks li::before { color: var(--gold); }
+
+  .tier-secret {
+    border-color: var(--gold);
+    background:
+      linear-gradient(180deg, rgba(229,181,71,0.12), rgba(229,181,71,0.02) 60%),
+      var(--ink-soft);
+    box-shadow:
+      0 0 0 1px rgba(229,181,71,0.2),
+      0 30px 80px rgba(229,181,71,0.08);
+  }
+  .tier-secret::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(125deg, rgba(255,0,180,0.06) 0%, rgba(0,200,255,0.06) 25%, rgba(255,220,80,0.08) 50%, rgba(0,255,180,0.06) 75%, rgba(180,80,255,0.06) 100%);
+    background-size: 400% 400%;
+    animation: holoshift 16s ease infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .tier-secret > * { position: relative; z-index: 1; }
+  .tier-secret .tier-rarity { color: var(--gold); }
+  .tier-secret .tier-rarity::before { content: '★'; color: var(--gold); }
+  .tier-secret .tier-perks li::before { color: var(--gold); }
+
+  .tier-stamp {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: var(--gold);
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border: 1px solid var(--gold);
+    border-radius: 2px;
+    z-index: 2;
+  }
+  .tier-stamp.featured { color: var(--gold); border-color: rgba(229,181,71,0.5); }
+
+  /* === Use of funds === */
+  .uof {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--hairline);
+    border: 1px solid var(--hairline);
+  }
+  .uof-cell {
+    background: var(--ink);
+    padding: 28px 24px;
+  }
+  .uof-cell .pct {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 36px; font-weight: 700;
+    color: var(--gold); letter-spacing: -0.02em;
+  }
+  .uof-cell .amt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--mute);
+    margin-bottom: 16px; letter-spacing: 0.06em;
+  }
+  .uof-cell h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px; font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: lowercase;
+    letter-spacing: -0.01em;
+  }
+  .uof-cell p {
+    font-size: 13px;
+    color: rgba(242, 232, 213, 0.66);
+    line-height: 1.5;
+  }
+
+  /* === Terms grid === */
+  .terms {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--hairline);
+    border: 1px solid var(--hairline);
+  }
+  .terms-cell { background: var(--ink); padding: 32px 28px; }
+  .terms-cell .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .terms-cell h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px; font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+    text-transform: lowercase;
+  }
+  .terms-cell p {
+    font-size: 14px;
+    color: rgba(242, 232, 213, 0.7);
+    line-height: 1.55;
+  }
+
+  /* === CTA === */
+  .cta {
+    padding: 100px 32px;
+    text-align: center;
+    border-top: 1px solid var(--hairline);
+    position: relative;
+    overflow: hidden;
+  }
+  .cta::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at center, rgba(229,181,71,0.12), transparent 60%);
+    pointer-events: none;
+  }
+  .cta-inner { position: relative; }
+  .cta h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-transform: lowercase;
+    margin-bottom: 20px;
+  }
+  .cta h2 .accent {
+    background: linear-gradient(120deg, var(--gold), var(--bolt), var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .cta p {
+    color: rgba(242,232,213,0.74);
+    font-size: 17px;
+    margin-bottom: 40px;
+    max-width: 580px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cta-buttons {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-block;
+    padding: 18px 32px;
+    border: 1px solid var(--gold);
+    background: var(--gold);
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--bolt); border-color: var(--bolt); }
+  .btn-secondary {
+    background: transparent;
+    border-color: var(--hairline);
+    color: var(--card);
+  }
+  .btn-secondary:hover {
+    background: transparent;
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* === Footer === */
+  footer { padding: 64px 32px 40px; border-top: 1px solid var(--hairline); background: var(--ink-soft); }
+  .footer-grid {
+    display: grid; grid-template-columns: 2fr 1fr 1fr;
+    gap: 48px; margin-bottom: 48px;
+  }
+  footer h6 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em;
+    color: var(--gold); text-transform: uppercase; margin-bottom: 14px;
+  }
+  footer p, footer a {
+    color: rgba(242, 232, 213, 0.68);
+    font-size: 14px; text-decoration: none; line-height: 1.7;
+  }
+  footer a:hover { color: var(--card); }
+  .footer-mark {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 64px; font-weight: 700; letter-spacing: -0.04em;
+    line-height: 1; color: transparent;
+    -webkit-text-stroke: 1px rgba(229, 181, 71, 0.4);
+    text-transform: lowercase; margin-bottom: 14px;
+  }
+  .footer-disclaim {
+    border-top: 1px solid var(--hairline); padding-top: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--mute); line-height: 1.7;
+    max-width: 920px;
+  }
+
+  @media (max-width: 880px) {
+    .section-head { grid-template-columns: 1fr; gap: 14px; }
+    .section-lede { grid-column: 1; }
+    .deal { grid-template-columns: 1fr 1fr; }
+    .tiers { grid-template-columns: 1fr; }
+    .tier-small-row { grid-template-columns: 1fr; grid-column: 1; }
+    .uof, .terms { grid-template-columns: 1fr 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+    .raise-meta { grid-template-columns: 1fr; }
+    section { padding: 56px 24px; }
+    .cover { padding: 64px 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .holo, .holo-intense, .tier-secret::before, .pulse { animation: none; }
+  }
+  @media print {
+    body { background: white; color: black; }
+    .ribbon, .cta { display: none; }
+    .holo, .holo-intense { background: white; animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ribbon">
+  <div><span class="ribbon-mark">◆</span> pokestr / founder round</div>
+  <a href="index.html" class="ribbon-home">◆ home</a>
+  <div class="ribbon-status">
+    <span class="pulse"></span>
+    <span style="color: var(--leaf);">open / accepting commitments</span>
+  </div>
+</div>
+
+<header class="cover">
+  <div class="shell cover-inner">
+    <div class="cover-meta">private round — pre-launch — solana</div>
+    <h1>back the vault.<br><span class="accent">the ultimate flywheel.</span></h1>
+    <p class="lede">$100k founder round across four tiers. 20% of supply, vested. 0.5% of every trade fee forever. allocation in every sister token. the earliest seats on the strategy network.</p>
+
+    <div class="raise">
+      <div class="raise-head">
+        <div>
+          <div class="raise-label">total raise target</div>
+        </div>
+        <div class="raise-amount">$100,000</div>
+      </div>
+      <div class="progress"><div class="progress-fill" id="bar"></div></div>
+      <div class="raise-meta">
+        <div>
+          <div class="k">allocation</div>
+          <div class="v gold">20% supply</div>
+        </div>
+        <div>
+          <div class="k">vesting</div>
+          <div class="v">3mo / 3mo</div>
+        </div>
+        <div>
+          <div class="k">fee share</div>
+          <div class="v">0.5% trades</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="deal">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 01 — the deal</div>
+      <h2>what you get.</h2>
+    </div>
+    <p class="section-lede" style="margin-bottom:40px;">a token allocation that vests over 6 months, a permanent share of trade fees, and founder-tier perks scaled to your check size. higher tiers get materially better rates, not just bigger numbers.</p>
+
+    <div class="deal">
+      <div class="deal-cell">
+        <div class="k">token allocation</div>
+        <div class="v gold">20M $pokestr</div>
+        <div class="sub">20% of total supply<br>split across investors</div>
+      </div>
+      <div class="deal-cell">
+        <div class="k">vesting</div>
+        <div class="v">3 + 3 mo</div>
+        <div class="sub">3 month cliff<br>3 month linear vest</div>
+      </div>
+      <div class="deal-cell">
+        <div class="k">fee revenue share</div>
+        <div class="v">0.5%</div>
+        <div class="sub">of every trade<br>distributed pro-rata</div>
+      </div>
+      <div class="deal-cell">
+        <div class="k">network access</div>
+        <div class="v">all sisters</div>
+        <div class="sub">priority allocation<br>in every future raise</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tiers">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 02 — tiers</div>
+      <h2>four cards. four rarities.</h2>
+    </div>
+    <p class="section-lede" style="margin-bottom:32px;">the rate per dollar gets better at every step. $5k breaks even on tokens at launch. $10k clears launch value by 25% before perks, fee share, or sister-token upside.</p>
+
+    <div style="display:flex; gap:16px; align-items:center; padding:18px 22px; border:1px solid rgba(229,181,71,0.3); background:rgba(229,181,71,0.04); margin-bottom:32px; font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.06em; flex-wrap:wrap;">
+      <span style="color: var(--gold); text-transform: uppercase;">◆ launch reference</span>
+      <span style="color: rgba(242,232,213,0.7);">target mcap <strong style="color:var(--card);">~$500k</strong></span>
+      <span style="color: var(--mute);">·</span>
+      <span style="color: rgba(242,232,213,0.7);">implied launch price <strong style="color:var(--card);">$0.005 / token</strong></span>
+    </div>
+
+    <div class="tiers">
+      <!-- Top row: small tiers -->
+      <div class="tier-small-row">
+        <div class="tier">
+          <div class="tier-rarity">common — entry</div>
+          <div class="tier-name">backer</div>
+          <div class="tier-price">$1,000</div>
+          <div class="tier-slot">10 slots available</div>
+
+          <div class="tier-allocation">
+            <div class="cell">
+              <div class="k">tokens</div>
+              <div class="v gold">130,000</div>
+            </div>
+            <div class="cell">
+              <div class="k">value @ launch</div>
+              <div class="v">$650</div>
+            </div>
+          </div>
+
+          <ul class="tier-perks">
+            <li>0.13% of supply</li>
+            <li>pro-rata fee share (1x weight)</li>
+            <li>investor discord channel</li>
+            <li>backer role on launch</li>
+          </ul>
+        </div>
+
+        <div class="tier">
+          <div class="tier-rarity">uncommon</div>
+          <div class="tier-name">supporter</div>
+          <div class="tier-price">$2,000</div>
+          <div class="tier-slot">10 slots available</div>
+
+          <div class="tier-allocation">
+            <div class="cell">
+              <div class="k">tokens</div>
+              <div class="v gold">320,000</div>
+            </div>
+            <div class="cell">
+              <div class="k">value @ launch</div>
+              <div class="v">$1,600</div>
+            </div>
+          </div>
+
+          <ul class="tier-perks">
+            <li>0.32% of supply</li>
+            <li>pro-rata fee share (1x weight)</li>
+            <li>investor discord channel</li>
+            <li>early access to weekly vault listings</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Featured: $5k -->
+      <div class="tier tier-featured">
+        <div class="tier-stamp featured">rare holo</div>
+        <div class="tier-rarity">rare holo — founder</div>
+        <div class="tier-name">founder</div>
+        <div class="tier-price">$5,000</div>
+        <div class="tier-slot">8 slots available</div>
+
+        <div class="tier-allocation">
+          <div class="cell">
+            <div class="k">tokens</div>
+            <div class="v gold">1,000,000</div>
+          </div>
+          <div class="cell">
+            <div class="k">value @ launch</div>
+            <div class="v gold">$5,000 <span style="color:var(--leaf); font-size:11px; letter-spacing:0.05em;">break-even</span></div>
+          </div>
+        </div>
+
+        <ul class="tier-perks">
+          <li class="gold">1% of supply</li>
+          <li class="gold">1.5× weighted fee share (lifetime)</li>
+          <li class="gold">master tier perks unlocked — no staking required</li>
+          <li>founder-only discord with the team</li>
+          <li>guaranteed allocation in every sister token</li>
+          <li>named on the on-chain founder registry</li>
+          <li>quarterly investor call</li>
+        </ul>
+      </div>
+
+      <!-- Featured: $10k -->
+      <div class="tier tier-secret">
+        <div class="tier-stamp">1st ed / secret rare</div>
+        <div class="tier-rarity">secret rare — architect</div>
+        <div class="tier-name">architect</div>
+        <div class="tier-price">$10,000</div>
+        <div class="tier-slot">3 slots available</div>
+
+        <div class="tier-allocation">
+          <div class="cell">
+            <div class="k">tokens</div>
+            <div class="v gold">2,500,000</div>
+          </div>
+          <div class="cell">
+            <div class="k">value @ launch</div>
+            <div class="v gold">$12,500 <span style="color:var(--leaf); font-size:11px; letter-spacing:0.05em;">+25%</span></div>
+          </div>
+        </div>
+
+        <ul class="tier-perks">
+          <li class="gold">2.5% of supply</li>
+          <li class="gold">2× weighted fee share (lifetime)</li>
+          <li class="gold">master tier perks unlocked — no staking required</li>
+          <li class="gold">guaranteed grail airdrop — psa-graded card from the vault</li>
+          <li class="gold">direct line to founding team (1:1)</li>
+          <li class="gold">voting rights on first 5 vault grail acquisitions</li>
+          <li>guaranteed allocation in every sister token</li>
+          <li>1st edition tag on founder registry — permanent</li>
+          <li>co-host credit on quarterly investor calls</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="funds">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 03 — use of funds</div>
+      <h2>where $100k goes.</h2>
+    </div>
+    <div class="uof">
+      <div class="uof-cell">
+        <div class="pct">45%</div>
+        <div class="amt">$45,000</div>
+        <h4>initial lp</h4>
+        <p>seed liquidity at curve graduation. permanently locked. the floor of the protocol.</p>
+      </div>
+      <div class="uof-cell">
+        <div class="pct">40%</div>
+        <div class="amt">$40,000</div>
+        <h4>smart contract audits</h4>
+        <p>independent audits of token-2022 implementation, fee splitter, vesting, and staking contracts.</p>
+      </div>
+      <div class="uof-cell">
+        <div class="pct">10%</div>
+        <div class="amt">$10,000</div>
+        <h4>vault seed inventory</h4>
+        <p>first grails before fee revenue kicks in. proves the loop on day one.</p>
+      </div>
+      <div class="uof-cell">
+        <div class="pct">5%</div>
+        <div class="amt">$5,000</div>
+        <h4>build &amp; expansion</h4>
+        <p>marketplace frontend, dashboard, and the first sister token launch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="terms">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 04 — terms</div>
+      <h2>the fine print.</h2>
+    </div>
+    <div class="terms">
+      <div class="terms-cell">
+        <div class="label">◆ vesting</div>
+        <h4>3 month cliff</h4>
+        <p>no investor tokens unlock for the first 3 months post-launch. then linear release over the next 3 months. locked on-chain via streamflow or jupiter lock.</p>
+      </div>
+      <div class="terms-cell">
+        <div class="label">◆ distribution</div>
+        <h4>direct to wallet</h4>
+        <p>investors provide a solana address at commitment. tokens are loaded into a verifiable lock contract addressed to that wallet at launch.</p>
+      </div>
+      <div class="terms-cell">
+        <div class="label">◆ fee share</div>
+        <h4>perpetual</h4>
+        <p>0.5% of every trade fee is split across all investors pro-rata to allocation × tier weight. paid in sol, claimable monthly from the investor dashboard.</p>
+      </div>
+      <div class="terms-cell">
+        <div class="label">◆ commitment</div>
+        <h4>refunded if we don't launch</h4>
+        <p>if the project fails to reach launch for any reason, all committed funds are refunded in full. once the token launches at tge, commitments become non-refundable — capital deploys into lp, audits, and operations.</p>
+      </div>
+      <div class="terms-cell">
+        <div class="label">◆ access</div>
+        <h4>no kyc</h4>
+        <p>all tiers can commit pseudonymously. provide a solana address and an email for round updates — that is the full requirement.</p>
+      </div>
+      <div class="terms-cell">
+        <div class="label">◆ governance</div>
+        <h4>1 token = 1 vote</h4>
+        <p>investor tokens vote like any other tokens once unlocked. $10k tier additionally has voting rights on the first 5 vault grail purchases.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="why" class="holo">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 05 — why now</div>
+      <h2>the window is short.</h2>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:48px; max-width:980px;">
+      <div>
+        <h4 style="font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:600; margin-bottom:12px; text-transform:lowercase;">◆ the model is proven</h4>
+        <p style="color:rgba(242,232,213,0.74); font-size:15px;">pnkstr and nftstrategy demonstrated that the trade-fee → treasury → buy-and-burn loop works. the math holds. the only open question was which collectible category gets the strategy treatment next.</p>
+      </div>
+      <div>
+        <h4 style="font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:600; margin-bottom:12px; text-transform:lowercase;">◆ the market is bigger</h4>
+        <p style="color:rgba(242,232,213,0.74); font-size:15px;">graded trading cards trade in the hundreds of millions annually. the audience is mainstream. the asset has 25 years of price history. nfts cannot say any of these things.</p>
+      </div>
+      <div>
+        <h4 style="font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:600; margin-bottom:12px; text-transform:lowercase;">◆ first-mover seat</h4>
+        <p style="color:rgba(242,232,213,0.74); font-size:15px;">no equivalent protocol exists. the founder round is the only path to a tagged seat on the network before launch. after tge, allocation is only available through the open market at price discovery.</p>
+      </div>
+      <div>
+        <h4 style="font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:600; margin-bottom:12px; text-transform:lowercase;">◆ the hub compounds</h4>
+        <p style="color:rgba(242,232,213,0.74); font-size:15px;">every sister token launched routes fees back to burn $pokestr. founder investors get priority allocation in those raises too — compounding the position automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<footer>
+  <div class="shell">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-mark">pokestr</div>
+        <p>a deflationary protocol on solana. the vault, forever.</p>
+      </div>
+      <div>
+        <h6>round</h6>
+        <p>founder / pre-launch<br>$100k target<br>21 total seats</p>
+      </div>
+      <div>
+        <h6>contact</h6>
+        <p>thepokestrat.com<br>x / @thepokestrat<br>support@thepokestrat.com</p>
+      </div>
+    </div>
+    <div class="footer-disclaim">
+      not investment advice. not affiliated with the pokémon company, nintendo, creatures, game freak, psa, or any third party referenced. trademarks belong to their owners. this page describes participation in a token launch and does not constitute an offer of securities. cryptocurrency and collectible assets carry substantial risk including total loss. participation may be restricted in your jurisdiction. participate only with funds you can afford to lose. verify on-chain. trust the chain, not the team.
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Animate progress bar on load (set to 0% — adjust as funds come in)
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('bar').style.width = '0%';
+    }, 300);
+  });
+</script>
+
+</body>
+</html>

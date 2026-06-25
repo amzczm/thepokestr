@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pokestr — whitepaper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0A0D14;
+    --ink-soft: #141822;
+    --card: #F2E8D5;
+    --card-dark: #1B1F2A;
+    --gold: #E5B547;
+    --burn: #D63B2C;
+    --bolt: #F5D547;
+    --leaf: #6BA368;
+    --water: #4A88C7;
+    --mute: #6B7280;
+    --hairline: rgba(242, 232, 213, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ink);
+    color: var(--card);
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .holo {
+    background:
+      linear-gradient(125deg, rgba(255,0,180,0.18) 0%, rgba(0,200,255,0.18) 25%, rgba(255,220,80,0.22) 50%, rgba(0,255,180,0.18) 75%, rgba(180,80,255,0.18) 100%),
+      repeating-linear-gradient(45deg, transparent 0px, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px),
+      var(--card-dark);
+    background-size: 400% 400%, 8px 8px, 100% 100%;
+    animation: holoshift 18s ease infinite;
+  }
+  @keyframes holoshift {
+    0%, 100% { background-position: 0% 50%, 0 0, 0 0; }
+    50% { background-position: 100% 50%, 0 0, 0 0; }
+  }
+
+  .shell { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+
+  .ribbon {
+    padding: 14px 32px;
+    border-bottom: 1px solid var(--hairline);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mute);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(8px);
+    background: rgba(10, 13, 20, 0.85);
+  }
+  .ribbon-mark { color: var(--gold); font-weight: 700; }
+  .ribbon-home {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--card);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 6px 20px;
+    border: 1px solid var(--hairline);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .ribbon-home:hover { color: var(--gold); border-color: rgba(229,181,71,0.4); }
+  .ribbon nav { display: flex; gap: 24px; }
+  .ribbon nav a { color: var(--mute); text-decoration: none; transition: color 0.2s; }
+  .ribbon nav a:hover { color: var(--card); }
+
+  .cover { padding: 80px 32px 100px; position: relative; overflow: hidden; }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(229, 181, 71, 0.08), transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(214, 59, 44, 0.06), transparent 50%);
+    pointer-events: none;
+  }
+  .cover-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 56px; align-items: center; position: relative; }
+  .cover-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .cover-meta::before { content: ''; width: 28px; height: 1px; background: var(--gold); }
+  .cover h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(56px, 9vw, 120px);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    margin-bottom: 28px;
+  }
+  .cover h1 .accent {
+    background: linear-gradient(120deg, var(--gold), var(--bolt), var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .cover .lede {
+    font-size: 19px;
+    line-height: 1.4;
+    color: rgba(242, 232, 213, 0.78);
+    max-width: 520px;
+    margin-bottom: 36px;
+  }
+  .pulls { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border: 1px solid var(--hairline);
+    border-radius: 2px;
+  }
+  .tag.gold { color: var(--gold); border-color: rgba(229, 181, 71, 0.4); }
+  .tag.burn { color: var(--burn); border-color: rgba(214, 59, 44, 0.4); }
+
+  .card-hero {
+    aspect-ratio: 5 / 7;
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid rgba(229, 181, 71, 0.35);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.06);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transform: perspective(1200px) rotateY(-6deg) rotateX(2deg);
+    transition: transform 0.6s;
+  }
+  .card-hero:hover { transform: perspective(1200px) rotateY(0deg) rotateX(0deg); }
+  .card-frame {
+    flex: 1;
+    border: 1px solid rgba(242, 232, 213, 0.15);
+    border-radius: 8px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    background: rgba(10, 13, 20, 0.4);
+    backdrop-filter: blur(4px);
+  }
+  .card-topbar { display: flex; justify-content: space-between; align-items: flex-start; }
+  .card-name { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .card-hp { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 0.08em; text-align: right; }
+  .card-hp .num { font-size: 22px; color: var(--card); display: block; font-weight: 700; }
+  .card-art {
+    aspect-ratio: 1;
+    margin: 18px 0;
+    border-radius: 4px;
+    border: 1px solid rgba(229, 181, 71, 0.2);
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(229,181,71,0.15), transparent 60%),
+      radial-gradient(circle at 70% 70%, rgba(214,59,44,0.12), transparent 60%),
+      var(--card-dark);
+  }
+  .card-art-mark {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 72px; font-weight: 700;
+    color: var(--gold); opacity: 0.18;
+  }
+  .card-art-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(229,181,71,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(229,181,71,0.06) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+  .card-attack {
+    border-top: 1px solid rgba(242,232,213,0.12);
+    padding-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(242,232,213,0.7);
+    line-height: 1.5;
+    margin-top: auto;
+  }
+  .card-attack strong { color: var(--card); display: block; margin-bottom: 4px; font-size: 11px; }
+  .card-footer {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(242,232,213,0.08);
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; color: var(--mute); letter-spacing: 0.1em;
+  }
+
+  section { padding: 80px 32px; border-top: 1px solid var(--hairline); }
+  .section-head {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 48px;
+    margin-bottom: 48px;
+    align-items: end;
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--gold);
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-num::after { content: ''; flex: 1; height: 1px; background: var(--hairline); }
+  .section-head h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(32px, 4.5vw, 52px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-transform: lowercase;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--hairline);
+    border: 1px solid var(--hairline);
+  }
+  .stat { background: var(--ink); padding: 26px 22px; }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--mute); margin-bottom: 12px;
+  }
+  .stat-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px; font-weight: 700; letter-spacing: -0.02em;
+  }
+  .stat-val.gold { color: var(--gold); }
+  .stat-val.burn { color: var(--burn); }
+  .stat-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--mute); margin-top: 6px; }
+
+  .flywheel {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--hairline);
+  }
+  .step { padding: 28px 22px; border-right: 1px solid var(--hairline); position: relative; }
+  .step:last-child { border-right: none; }
+  .step-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 0.14em; margin-bottom: 14px; }
+  .step h4 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .step p { font-size: 13px; color: rgba(242, 232, 213, 0.66); line-height: 1.5; }
+  .step::after {
+    content: '→';
+    position: absolute; right: -10px; top: 32px;
+    color: var(--gold); font-size: 18px;
+    background: var(--ink); width: 20px; text-align: center; z-index: 2;
+  }
+  .step:last-child::after { display: none; }
+
+  .feebar {
+    display: flex; height: 52px;
+    border: 1px solid var(--hairline);
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .feebar > div {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink); font-weight: 700; letter-spacing: 0.08em;
+  }
+  .fb-main { flex: 6; background: var(--gold); }
+  .fb-give { flex: 1; background: var(--bolt); }
+  .fb-inv { flex: 0.5; background: var(--leaf); }
+  .fb-team { flex: 0.5; background: var(--water); color: var(--card); }
+  .feebar-key {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mute);
+  }
+  .feebar-key div span { display: inline-block; width: 10px; height: 10px; margin-right: 8px; vertical-align: middle; }
+
+  .alloc { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .alloc-chart {
+    aspect-ratio: 1; border-radius: 50%;
+    background: conic-gradient(var(--gold) 0% 60%, var(--bolt) 60% 80%, var(--water) 80% 100%);
+    position: relative; max-width: 300px; margin: 0 auto;
+  }
+  .alloc-chart::before { content: ''; position: absolute; inset: 22%; background: var(--ink); border-radius: 50%; }
+  .alloc-chart::after {
+    content: '100M';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700;
+    color: var(--gold); z-index: 2;
+  }
+  .alloc-key { list-style: none; }
+  .alloc-key li {
+    display: grid; grid-template-columns: 14px 70px 1fr auto;
+    gap: 14px; padding: 16px 0;
+    border-bottom: 1px solid var(--hairline);
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  }
+  .alloc-key .dot { width: 12px; height: 12px; border-radius: 2px; }
+  .alloc-key .pct { color: var(--gold); font-weight: 700; font-size: 14px; }
+  .alloc-key .label { color: var(--card); text-transform: uppercase; letter-spacing: 0.08em; }
+  .alloc-key .note { color: var(--mute); text-align: right; }
+
+  .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .tier {
+    border: 1px solid var(--hairline);
+    padding: 24px 20px;
+    background: linear-gradient(180deg, rgba(229,181,71,0.04), transparent 50%), var(--ink-soft);
+    transition: transform 0.3s, border-color 0.3s;
+    position: relative;
+  }
+  .tier:hover { transform: translateY(-3px); border-color: rgba(229, 181, 71, 0.4); }
+  .tier-corner {
+    position: absolute; top: 12px; right: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--mute); letter-spacing: 0.1em;
+  }
+  .tier h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px; font-weight: 700; text-transform: lowercase;
+    margin-bottom: 18px; letter-spacing: -0.02em;
+  }
+  .tier-stake {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--gold); margin-bottom: 18px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--hairline);
+  }
+  .tier-stake .num { font-size: 17px; color: var(--card); display: block; }
+  .tier-perk {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: rgba(242,232,213,0.6); margin-bottom: 8px; text-transform: uppercase;
+  }
+  .tier-perk strong { color: var(--bolt); font-weight: 700; }
+  .tier.master { border-color: rgba(229, 181, 71, 0.4); }
+  .tier.master .tier-perk strong { color: var(--gold); }
+
+  .pull {
+    border-left: 2px solid var(--gold);
+    padding: 28px 32px;
+    background: rgba(229, 181, 71, 0.04);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(20px, 2.6vw, 28px);
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    text-transform: lowercase;
+    max-width: 860px;
+    margin: 36px 0 0;
+  }
+
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  .twocol h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px; font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+    text-transform: lowercase;
+  }
+  .twocol h4::before { content: '◆'; color: var(--gold); margin-right: 10px; font-size: 11px; }
+  .twocol p { color: rgba(242,232,213,0.74); font-size: 15px; line-height: 1.55; }
+
+  .trust {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--hairline); border: 1px solid var(--hairline);
+  }
+  .trust-item { background: var(--ink); padding: 24px 22px; }
+  .trust-item .check {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--leaf); font-size: 11px;
+    margin-bottom: 12px; letter-spacing: 0.1em;
+  }
+  .trust-item h5 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px; font-weight: 600;
+    margin-bottom: 6px; text-transform: lowercase;
+  }
+  .trust-item p { font-size: 12px; color: rgba(242,232,213,0.6); line-height: 1.5; }
+
+  .network { padding: 32px 0 8px; }
+  .network-hub {
+    width: 130px; height: 130px; margin: 0 auto;
+    border: 2px solid var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--ink);
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+    color: var(--gold);
+    box-shadow: 0 0 60px rgba(229, 181, 71, 0.2);
+  }
+  .network-ring { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 36px; }
+  .network-node {
+    border: 1px solid var(--hairline);
+    padding: 16px 12px; text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: rgba(242,232,213,0.7);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .network-node strong { display: block; color: var(--card); font-size: 13px; margin-bottom: 4px; font-weight: 700; }
+
+  footer { padding: 64px 32px 40px; border-top: 1px solid var(--hairline); background: var(--ink-soft); }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+  footer h6 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em;
+    color: var(--gold); text-transform: uppercase; margin-bottom: 14px;
+  }
+  footer p, footer a { color: rgba(242, 232, 213, 0.68); font-size: 14px; text-decoration: none; line-height: 1.7; }
+  footer a:hover { color: var(--card); }
+  .footer-mark {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 72px; font-weight: 700; letter-spacing: -0.04em;
+    line-height: 1; color: transparent;
+    -webkit-text-stroke: 1px rgba(229, 181, 71, 0.4);
+    text-transform: lowercase; margin-bottom: 14px;
+  }
+  .footer-disclaim {
+    border-top: 1px solid var(--hairline); padding-top: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--mute); line-height: 1.7;
+  }
+
+  @media (max-width: 880px) {
+    .cover-grid { grid-template-columns: 1fr; gap: 40px; }
+    .card-hero { max-width: 300px; margin: 0 auto; transform: none; }
+    .section-head { grid-template-columns: 1fr; gap: 16px; }
+    .stats, .trust, .tiers { grid-template-columns: repeat(2, 1fr); }
+    .flywheel { grid-template-columns: 1fr; }
+    .step { border-right: none; border-bottom: 1px solid var(--hairline); }
+    .step::after { display: none; }
+    .alloc, .twocol { grid-template-columns: 1fr; gap: 32px; }
+    .network-ring { grid-template-columns: 1fr 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+    .ribbon nav { display: none; }
+    section { padding: 56px 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .holo { animation: none; }
+    .card-hero { transform: none; }
+  }
+  @media print {
+    body { background: white; color: black; }
+    .ribbon { display: none; }
+    .holo { background: white; animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ribbon">
+  <div><span class="ribbon-mark">◆</span> pokestr / whitepaper</div>
+  <a href="index.html" class="ribbon-home">home</a>
+  <nav>
+    <a href="#mechanism">mechanism</a>
+    <a href="#tokenomics">tokenomics</a>
+    <a href="#tiers">tiers</a>
+    <a href="#network">network</a>
+    <a href="#trust">trust</a>
+  </nav>
+</div>
+
+<header class="cover holo">
+  <div class="shell">
+    <div class="cover-grid">
+      <div>
+        <div class="cover-meta">whitepaper v1.0 — solana</div>
+        <h1>the vault.<br><span class="accent">forever.</span></h1>
+        <p class="lede">a deflationary protocol on solana turning trade volume into a vault of pokémon grails. forever.</p>
+        <div class="pulls">
+          <span class="tag gold">100m supply</span>
+          <span class="tag">8% trade fee</span>
+          <span class="tag burn">buy &amp; burn</span>
+        </div>
+      </div>
+      <div class="card-hero holo">
+        <div class="card-frame">
+          <div class="card-topbar">
+            <div class="card-name">$pokestr</div>
+            <div class="card-hp">vault hp<span class="num">100M</span></div>
+          </div>
+          <div class="card-art">
+            <div class="card-art-grid"></div>
+            <div class="card-art-mark">◆</div>
+          </div>
+          <div class="card-attack">
+            <strong>◇ burn forever — 8% fee</strong>
+            every swap funds the vault. the vault buys grails. the vault burns supply.
+          </div>
+          <div class="card-footer">
+            <span>1st ed / solana</span>
+            <span>holo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="thesis">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 01 — thesis</div>
+      <h2>the vault is the protocol.</h2>
+    </div>
+    <p style="max-width:760px; font-size:18px; color:rgba(242,232,213,0.78);">an 8% trade fee funds a treasury that buys grails, relists them at 1.35×, and uses the profit to buy and burn $pokestr. supply shrinks forever. the vault accumulates real assets forever. the model is proven by pnkstr and nftstrategy — pointed at a market that is older, deeper, and more mainstream than nfts.</p>
+    <div class="pull">"the vault buys grails. the vault burns supply. forever."</div>
+  </div>
+</section>
+
+<section id="mechanism">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 02 — mechanism</div>
+      <h2>the flywheel.</h2>
+    </div>
+    <div class="flywheel">
+      <div class="step">
+        <div class="step-num">▸ 01</div>
+        <h4>fee collected</h4>
+        <p>every swap is taxed 8% in sol. transfers and staking are untaxed.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">▸ 02</div>
+        <h4>grail acquired</h4>
+        <p>6% routes to the reserve. the multisig buys psa 10 grails on collector crypt and courtyard.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">▸ 03</div>
+        <h4>card resold</h4>
+        <p>grails relist at 1.35× markup.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">▸ 04</div>
+        <h4>supply burned</h4>
+        <p>proceeds buy $pokestr off market. tokens sent to burn address. permanent.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tokenomics">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 03 — tokenomics</div>
+      <h2>fixed supply.</h2>
+    </div>
+
+    <div class="stats" style="margin-bottom:56px;">
+      <div class="stat">
+        <div class="stat-label">total supply</div>
+        <div class="stat-val gold">100,000,000</div>
+        <div class="stat-sub">fixed forever</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">chain</div>
+        <div class="stat-val">solana</div>
+        <div class="stat-sub">token-2022</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">trade fee</div>
+        <div class="stat-val">8%</div>
+        <div class="stat-sub">flat, in sol</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">launch mcap</div>
+        <div class="stat-val gold">~$500k</div>
+        <div class="stat-sub">at curve graduation</div>
+      </div>
+    </div>
+
+    <div class="alloc">
+      <div class="alloc-chart" role="img" aria-label="allocation"></div>
+      <ul class="alloc-key">
+        <li><span class="dot" style="background:var(--gold);"></span><span class="pct">60%</span><span class="label">bonding curve</span><span class="note">market-acquired</span></li>
+        <li><span class="dot" style="background:var(--bolt);"></span><span class="pct">20%</span><span class="label">prior holders</span><span class="note">snapshot airdrop</span></li>
+        <li><span class="dot" style="background:var(--water);"></span><span class="pct">20%</span><span class="label">investors</span><span class="note">3mo cliff / 3mo vest</span></li>
+      </ul>
+    </div>
+
+    <p style="margin-top:36px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--mute); letter-spacing:0.05em; line-height:1.8;">investor allocation — 3 month cliff / 3 month linear vest, locked on-chain. fee share: 0.5% of all trade volume, distributed pro-rata. commitments are non-refundable post-tge. if the project does not launch for any reason, all committed funds are refunded in full.</p>
+  </div>
+</section>
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 04 — fees</div>
+      <h2>how 8% splits.</h2>
+    </div>
+    <div class="feebar">
+      <div class="fb-main">6% reserve</div>
+      <div class="fb-give">1% give</div>
+      <div class="fb-inv">0.5% inv</div>
+      <div class="fb-team">0.5% team</div>
+    </div>
+    <div class="feebar-key">
+      <div><span style="background:var(--gold);"></span> reserve — grails &amp; burn</div>
+      <div><span style="background:var(--bolt);"></span> giveaway pool</div>
+      <div><span style="background:var(--leaf);"></span> investors</div>
+      <div><span style="background:var(--water);"></span> team &amp; dev</div>
+    </div>
+  </div>
+</section>
+
+<section id="tiers">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 05 — tiers</div>
+      <h2>stake. rank up.</h2>
+    </div>
+    <div class="tiers">
+      <div class="tier">
+        <div class="tier-corner">01</div>
+        <h4>rookie</h4>
+        <div class="tier-stake">stake<span class="num">2,000,000</span></div>
+        <div class="tier-perk"><strong>−5%</strong> marketplace fee</div>
+        <div class="tier-perk">1× draw weight</div>
+      </div>
+      <div class="tier">
+        <div class="tier-corner">02</div>
+        <h4>amateur</h4>
+        <div class="tier-stake">stake<span class="num">7,500,000</span></div>
+        <div class="tier-perk"><strong>−10%</strong> marketplace fee</div>
+        <div class="tier-perk">2× draw weight</div>
+      </div>
+      <div class="tier">
+        <div class="tier-corner">03</div>
+        <h4>elite</h4>
+        <div class="tier-stake">stake<span class="num">12,500,000</span></div>
+        <div class="tier-perk"><strong>−15%</strong> marketplace fee</div>
+        <div class="tier-perk">4× draw weight</div>
+      </div>
+      <div class="tier master">
+        <div class="tier-corner">max</div>
+        <h4>master</h4>
+        <div class="tier-stake">stake<span class="num">20,000,000</span></div>
+        <div class="tier-perk"><strong>−20%</strong> marketplace fee</div>
+        <div class="tier-perk">8× draw weight</div>
+      </div>
+    </div>
+    <p style="margin-top:32px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--mute); letter-spacing:0.05em;">7-day minimum stake. draw weight = tier × tokens. governance proposal rights at master.</p>
+  </div>
+</section>
+
+<section id="giveaways">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 06 — giveaways</div>
+      <h2>the draw machine.</h2>
+    </div>
+    <div class="flywheel">
+      <div class="step">
+        <div class="step-num">▸ 01</div>
+        <h4>pool fills</h4>
+        <p>1% of trade fees accrue in sol.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">▸ 02</div>
+        <h4>threshold</h4>
+        <p>at ~$100, keeper opens an elite gacha pack.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">▸ 03</div>
+        <h4>vrf draws</h4>
+        <p>on-chain vrf selects winner by weight.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">▸ 04</div>
+        <h4>airdrop</h4>
+        <p>card lands in winner's wallet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="network">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 07 — network</div>
+      <h2>the strategy network.</h2>
+    </div>
+    <p style="max-width:720px; font-size:17px; color:rgba(242,232,213,0.74); margin-bottom:24px;">$pokestr is the flagship. each sister token runs its own reserve-and-burn loop and routes a slice of fees back into burning $pokestr. the hub strengthens every time the network expands.</p>
+    <div class="network">
+      <div class="network-hub">$pokestr</div>
+      <div class="network-ring">
+        <div class="network-node"><strong>$sprtstr</strong>sports</div>
+        <div class="network-node"><strong>$mtgstr</strong>magic</div>
+        <div class="network-node"><strong>$ygostr</strong>yu-gi-oh</div>
+        <div class="network-node"><strong>$opstr</strong>one piece</div>
+        <div class="network-node"><strong>$soccrstr</strong>soccer</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="governance">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 08 — governance</div>
+      <h2>narrow scope.</h2>
+    </div>
+    <div class="twocol">
+      <div>
+        <h4>in scope</h4>
+        <p>sister-token launches, fee adjustments, treasury deployment, major integrations.</p>
+      </div>
+      <div>
+        <h4>out of scope</h4>
+        <p>day-to-day ops, marketing, individual card purchases, anything needing a same-day response.</p>
+      </div>
+    </div>
+    <p style="margin-top:24px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--mute);">1 token = 1 vote. 50% + 1 majority. 5% quorum.</p>
+  </div>
+</section>
+
+<section id="trust">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-num">◆ 09 — trust</div>
+      <h2>verifiable.</h2>
+    </div>
+    <div class="trust">
+      <div class="trust-item">
+        <div class="check">✓</div>
+        <h5>squads multisig</h5>
+        <p>no single signer. signer set published.</p>
+      </div>
+      <div class="trust-item">
+        <div class="check">✓</div>
+        <h5>mint revoked</h5>
+        <p>supply cannot be increased by anyone.</p>
+      </div>
+      <div class="trust-item">
+        <div class="check">✓</div>
+        <h5>freeze revoked</h5>
+        <p>balances cannot be frozen at protocol level.</p>
+      </div>
+      <div class="trust-item">
+        <div class="check">✓</div>
+        <h5>no team allocation</h5>
+        <p>team holds no premined supply. compensated only via the 0.5% team fee stream.</p>
+      </div>
+      <div class="trust-item">
+        <div class="check">✓</div>
+        <h5>lp locked</h5>
+        <p>liquidity permanently locked at graduation.</p>
+      </div>
+      <div class="trust-item">
+        <div class="check">✓</div>
+        <h5>public dashboard</h5>
+        <p>every fee, buy, and burn surfaced live.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="shell">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-mark">pokestr</div>
+        <p>a deflationary protocol on solana. the vault, forever.</p>
+      </div>
+      <div>
+        <h6>contract</h6>
+        <p>solana / token-2022<br>mint: tbd at launch</p>
+      </div>
+      <div>
+        <h6>find us</h6>
+        <p>thepokestrat.com<br>x / @thepokestrat</p>
+      </div>
+    </div>
+    <div class="footer-disclaim">
+      not investment advice. not affiliated with the pokémon company, nintendo, creatures, game freak, psa, or any third party referenced. trademarks belong to their owners. participate only with funds you can afford to lose. verify on-chain.
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

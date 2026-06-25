@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pokestr — coming soon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0A0D14;
+    --ink-soft: #141822;
+    --card: #F2E8D5;
+    --card-dark: #1B1F2A;
+    --gold: #E5B547;
+    --gold-deep: #B88A1E;
+    --burn: #D63B2C;
+    --bolt: #F5D547;
+    --leaf: #6BA368;
+    --mute: #6B7280;
+    --hairline: rgba(242, 232, 213, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+  }
+  body {
+    background: var(--ink);
+    color: var(--card);
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* === Ribbon (matches investors.html) === */
+  .ribbon {
+    padding: 14px 32px;
+    border-bottom: 1px solid var(--hairline);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mute);
+    background: rgba(10, 13, 20, 0.95);
+    flex-shrink: 0;
+  }
+  .ribbon-mark { color: var(--gold); font-weight: 700; }
+  .ribbon-nav {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .ribbon-tab {
+    color: var(--mute);
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid transparent;
+    letter-spacing: 0.1em;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .ribbon-tab:hover {
+    color: var(--card);
+    border-color: var(--hairline);
+  }
+  .ribbon-status {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 0 0 var(--gold);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(229, 181, 71, 0.6); }
+    70%  { box-shadow: 0 0 0 8px rgba(229, 181, 71, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(229, 181, 71, 0); }
+  }
+
+  /* === Main stage === */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Radial glow backdrop */
+  main::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 40%, rgba(229, 181, 71, 0.07), transparent 60%),
+      radial-gradient(ellipse at 30% 80%, rgba(214, 59, 44, 0.05), transparent 50%);
+    pointer-events: none;
+  }
+
+  /* === Pokeball canvas wrapper === */
+  .pokeball-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Glow ring behind the pokeball */
+  .pokeball-glow {
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(229,181,71,0.12) 0%, transparent 70%);
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+  @keyframes glow-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50%       { transform: scale(1.15); opacity: 1; }
+  }
+
+  #pokeball {
+    width: 160px;
+    height: 160px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    position: relative;
+    z-index: 1;
+    animation: spin 3s linear infinite;
+    filter: drop-shadow(0 0 18px rgba(229,181,71,0.25));
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* === Text === */
+  .stage-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .stage-meta::before,
+  .stage-meta::after {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(56px, 10vw, 112px);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    text-align: center;
+  }
+  h1 .accent {
+    background: linear-gradient(120deg, var(--gold), var(--bolt), var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200%;
+    animation: shimmer 4s linear infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--mute);
+    text-transform: uppercase;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Blinking dots */
+  .dots span {
+    animation: blink 1.4s ease-in-out infinite;
+    color: var(--gold);
+  }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.2; }
+    40%           { opacity: 1; }
+  }
+
+  /* === Footer strip === */
+  .footer-strip {
+    padding: 16px 32px;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mute);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 600px) {
+    #pokeball { width: 112px; height: 112px; }
+    .ribbon { padding: 12px 20px; }
+    .footer-strip { flex-direction: column; gap: 6px; text-align: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #pokeball { animation: none; }
+    .pulse    { animation: none; }
+    .dots span { animation: none; opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ribbon">
+  <div><span class="ribbon-mark">◆</span> pokestr</div>
+  <nav class="ribbon-nav">
+    <a href="whitepaper.html" class="ribbon-tab">whitepaper</a>
+    <a href="investors.html" class="ribbon-tab">investors</a>
+  </nav>
+  <div class="ribbon-status">
+    <span class="pulse"></span>
+    <span style="color: var(--gold);">building</span>
+  </div>
+</div>
+
+<main>
+  <div class="pokeball-wrap">
+    <div class="pokeball-glow"></div>
+    <canvas id="pokeball" width="16" height="16"></canvas>
+  </div>
+
+  <div class="stage-meta">pre-launch</div>
+
+  <h1><span class="accent">coming</span><br>soon.</h1>
+
+  <p class="sub">
+    something big is being built
+    <span class="dots">
+      <span>.</span><span>.</span><span>.</span>
+    </span>
+  </p>
+</main>
+
+<div class="footer-strip">
+  <span>pokestr / solana</span>
+  <span>thepokestrat.com</span>
+</div>
+
+<script>
+  const canvas = document.getElementById('pokeball');
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  // Color map: 0=transparent, 1=red, 2=cream, 3=dark
+  const C = {
+    0: null,
+    1: '#CC2222',
+    2: '#F2E8D5',
+    3: '#0A0D14',
+  };
+
+  // 16x16 pixel pokeball grid
+  const pixels = [
+    [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0],
+    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+    [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1],
+    [3,3,3,3,3,3,3,2,2,3,3,3,3,3,3,3],
+    [3,3,3,3,3,3,3,2,2,3,3,3,3,3,3,3],
+    [2,2,2,2,2,2,2,3,3,2,2,2,2,2,2,2],
+    [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+    [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+    [0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0],
+    [0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0],
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0],
+    [0,0,0,0,0,2,2,2,2,2,2,0,0,0,0,0],
+  ];
+
+  for (let row = 0; row < 16; row++) {
+    for (let col = 0; col < 16; col++) {
+      const color = C[pixels[row][col]];
+      if (color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(col, row, 1, 1);
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
