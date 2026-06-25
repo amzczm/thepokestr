@@ -457,6 +457,16 @@
     .ribbon nav { display: none; }
     section { padding: 56px 24px; }
   }
+  @media (max-width: 600px) {
+    .ribbon { padding: 12px 16px; }
+    .ribbon-home { display: none; }
+    .stats, .trust, .tiers, .network-ring { grid-template-columns: 1fr; }
+    .cover { padding: 48px 16px 64px; }
+    .cover h1 { font-size: clamp(40px, 12vw, 64px); }
+    .footer-mark { font-size: 40px; }
+    .shell { padding: 0 16px; }
+    section { padding: 40px 16px; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .holo { animation: none; }
     .card-hero { transform: none; }

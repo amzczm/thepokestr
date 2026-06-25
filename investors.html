@@ -595,6 +595,20 @@
     section { padding: 56px 24px; }
     .cover { padding: 64px 24px; }
   }
+  @media (max-width: 600px) {
+    .ribbon { padding: 12px 16px; }
+    .ribbon-home { display: none; }
+    .ribbon-status span:not(.pulse) { display: none; }
+    .deal { grid-template-columns: 1fr; }
+    .uof, .terms { grid-template-columns: 1fr; }
+    .tier-allocation { grid-template-columns: 1fr 1fr; }
+    section { padding: 40px 16px; }
+    .cover { padding: 48px 16px; }
+    .cover h1 { font-size: clamp(40px, 12vw, 64px); }
+    .footer-mark { font-size: 40px; }
+    .cta { padding: 64px 16px; }
+    .shell { padding: 0 16px; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .holo, .holo-intense, .tier-secret::before, .pulse { animation: none; }
   }
